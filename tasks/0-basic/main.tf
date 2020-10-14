@@ -12,7 +12,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "..."
+  region = "eu-west-1"
 }
 
 ############
@@ -20,10 +20,12 @@ provider "aws" {
 ############
 variable "name" {
   description = "Name of EC2 instance"
+  default = "JG Test (user5)"
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
+  default = "t2.micro"
 }
 
 ######################################################################
@@ -62,12 +64,12 @@ data "aws_ami" "amazon_linux" {
 # Resources
 ############
 resource "aws_instance" "web" {
-  ami           = "..."
-  instance_type = "..."
-  subnet_id     = "..."
+  ami           = data.aws_ami.amazon_linux.image_id
+  instance_type = var.instance_type
+  subnet_id     = element(tolist(data.aws_subnet_ids.all.ids), 0)
 
   tags = {
-    Name = "..."
+    Name = var.name
   }
 }
 
@@ -75,5 +77,5 @@ resource "aws_instance" "web" {
 # Outputs
 ##########
 output "public_ip" {
-  value = "..."
+  value = aws_instance.web.public_ip
 }
